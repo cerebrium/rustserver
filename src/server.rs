@@ -1,4 +1,8 @@
 use std::net::TcpListener;
+use std::io::Read;
+use std::convert::TryFrom;
+use std::convert::TryInto;
+use crate::http::Request;
 
 // holds the data for the server struct
 pub struct Server {
@@ -21,15 +25,29 @@ impl Server {
         let listener = TcpListener::bind(&self.addr).unwrap();
 
         loop {
-            
             match listener.accept() {
-                Ok((stream, address)) => {
-                    println!("Connection from {}", address);
-                    // spawn a new thread for each connection
+                Ok((mut stream, address)) => {
+                    let mut buffer = [0; 1024];
+                    match stream.read(&mut buffer) {
+                        Ok(_) => {
+                            println!("{} request read from {}", String::from_utf8_lossy(&buffer), address);
 
-                }
+                            match Request::try_from(&buffer[..]) {
+                                Ok(request) => {
+                                },
+                                Err(e) => {
+                                    println!("Error parsing request: {}", e);
+                                }
+                                }
+                            },
+                        Err(e) => {
+                            println!("Error reading from buffer: {}", e);
+                        }
+                    }
+                },
+                    
                 Err(e) => {
-                    println!("Error: {}", e);
+                    println!("Error creating connection: {}", e);
                 }
             }
         }
