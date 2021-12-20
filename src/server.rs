@@ -1,7 +1,6 @@
 use std::net::TcpListener;
 use std::io::Read;
 use std::convert::TryFrom;
-use std::convert::TryInto;
 use crate::http::Request;
 
 // holds the data for the server struct
@@ -33,13 +32,12 @@ impl Server {
                             println!("{} request read from {}", String::from_utf8_lossy(&buffer), address);
 
                             match Request::try_from(&buffer[..]) {
-                                Ok(request) => {
-                                },
+                                Ok(request) => {},
                                 Err(e) => {
                                     println!("Error parsing request: {}", e);
                                 }
-                                }
-                            },
+                            }
+                        },
                         Err(e) => {
                             println!("Error reading from buffer: {}", e);
                         }
